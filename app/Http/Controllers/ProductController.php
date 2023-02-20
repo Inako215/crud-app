@@ -39,20 +39,7 @@ class ProductController extends Controller
     {
         $faker = \Faker\Factory::create();
 
-       $request->validate([
-            'name' => 'required',
-            'price' => 'regex:/^\d+(\.\d{1,2})?$/|required',
-            'item_number' => 'integer|required',
-            'description' => 'required',
-        ]);
-
-        \App\Models\Product::create([
-            'name' => $request->name,
-            'image' => $faker->imageUrl($width = 640, $height = 480),
-            'price' => $request->price,
-            'description' => $request->description,
-            'item_number' => $request->item_number
-        ]);
+        Product::create($this->validateRequest($request) + ['image' => $faker->imageUrl($width = 640, $height = 480)]);
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
@@ -91,21 +78,8 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $faker = \Faker\Factory::create();
-
-        $request->validate([
-             'name' => 'required',
-             'price' => 'regex:/^\d+(\.\d{1,2})?$/|required',
-             'item_number' => 'integer|required',
-             'description' => 'required',
-         ]);
  
-         Product::find($id) -> update([
-             'name' => $request->name,
-             'image' => $faker->imageUrl($width = 640, $height = 480),
-             'price' => $request->price,
-             'description' => $request->description,
-             'item_number' => $request->item_number
-         ]);
+         Product::find($id) -> update($this->validateRequest($request) + ['image' => $faker->imageUrl($width = 640, $height = 480)]);
  
          return redirect()->route('products.index')->with('success', 'Product Has Been Updated Successfully.');
     }
@@ -122,5 +96,15 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('products.index')->with('success', 'Product deleted successfully');
+    }
+
+    private function validateRequest($request)
+    {
+        return $request->validate([
+            'name' => 'required',
+            'price' => 'regex:/^\d+(\.\d{1,2})?$/|required',
+            'item_number' => 'integer|required',
+            'description' => 'required',
+        ]);
     }
 }
